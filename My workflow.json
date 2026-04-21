@@ -1,0 +1,160 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "863c5c4b-5501-4c44-86be-50af84aa96a3",
+      "name": "Telegram Trigger",
+      "webhookId": "753990fa-6a56-441e-a334-3a2199d4dbd4",
+      "credentials": {
+        "telegramApi": {
+          "id": "oB1TxAvTyVOTpqj0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.stability.ai/v2beta/stable-image/generate/sd3",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "image/*"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "mode",
+              "value": "=image-to-image"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $('Telegram Trigger').item.json.message.caption }}"
+            },
+            {
+              "name": "strength",
+              "value": "0.7"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b74db1f1-acc8-4a1c-8022-193c043c259c",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "slsS4T6dFauctMfY",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $now.toFormat('yyyyMMdd_HHmm') }}_{{ $json.message.from.first_name }}_{{ $json.message.caption ? $json.message.caption.substring(0,15).replace(/[^a-zA-Z0-9]/g, '') : 'image' }}.png",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1GC1LfUYt36hr6Lmv73jSrmK9Ut3J0Zrs",
+          "mode": "list",
+          "cachedResultName": "python",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1GC1LfUYt36hr6Lmv73jSrmK9Ut3J0Zrs"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "0e7143a7-b608-4cfa-ac26-43767b41825f",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "O9GY4RA0Na3WGM8I",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2d3f27f9-02a9-45ca-826d-4ed099e1a48d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9c497c9289a90db0baa2eb14fa75ab2d742f3248c2dfe9967a9db177f6f8502a"
+  },
+  "id": "4npB7DweA0St6TtA",
+  "tags": []
+}
